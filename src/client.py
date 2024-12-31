@@ -1,6 +1,8 @@
 import socket
 import sys
 
+buf_size = 512
+
 def main(ip, port):
     # creating socket
     clientsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -16,6 +18,13 @@ def main(ip, port):
             break
         
         clientsocket.send(msg.encode('utf-8'))
+        
+        msg = clientsocket.recv(buf_size)
+        if msg == b'': # Zero bytes received
+            print("socket connection broken")
+            break
+            
+        print(msg.decode('utf-8'))
     
     clientsocket.close()
     
