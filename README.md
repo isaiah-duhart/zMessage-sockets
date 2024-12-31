@@ -1,0 +1,1 @@
+This project is an instant messaging application.
