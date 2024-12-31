@@ -19,9 +19,18 @@ def main(ip, port):
         msg = clientsocket.recv(buf_size)
         if msg == b'': # Zero bytes received
             print("socket connection broken")
-            exit()
+            break
+            
+        print(msg.decode('utf-8')) 
+            
+        msg = input("Enter message: ")
+        if msg == "quit":
+            print("closing connection")
+            break  
         
-        print(msg.decode('utf-8'))   
+        clientsocket.send(msg.encode('utf-8'))
+    
+    serversocket.close()
     
 if __name__ == "__main__":
     if len(sys.argv) > 2:
