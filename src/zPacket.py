@@ -1,28 +1,47 @@
-SERV_CONN = 1
-CLIENT_WAIT = 2
-CLIENT_CONN = 4
-CLIENT_DISCONN = 8
-
+import struct
 class ZPacket:
-    def __init__(self, flags: int = 0, data: str):
+    # length of packet header
+    HEADER_LEN = 8
+
+    # Connection status flags
+    SERV_CONN = 1
+    CLIENT_WAIT = 2
+    CLIENT_ACCEPT = 4
+    CLIENT_DENY = 8
+    CLIENT_CONN = 64
+    CLIENT_DISCONN = 128
+
+    # query flags
+    CLIENT_REQ = 256
+    
+    def __init__(self, data: str = "", flags: int = 0):
         self.flags = flags
         self.data = data
     
     def build(self) -> bytes:
-        # Building packet with the length of the data and flags
-        packet = struct.pack('lh', len(self.data), flags)
+        # Building header with the length of the data and flags
+        header = struct.pack('ll', len(self.data), self.flags)
         
-        return packet + self.data.encode('utf-8')
+        return header + self.data.encode('utf-8')
     
-    def parse_flag(self) -> str:
-        if self.flags == SERV_CONN:
+    @staticmethod
+    def parse_bytes(bytes) -> struct:
+        if len(bytes) < 16:
+            return None
+        return bytes[:16]
+    
+    @staticmethod
+    def parse_flag(flags: int) -> str:
+        if flags == SERV_CONN:
             return "Server connected"
-        elif self.flags == CLIENT_WAIT:
+        elif flags == CLIENT_WAIT:
             return "Waiting for client to connect"
-        elif self.flags == CLIENT_CONN:
+        elif flags == CLIENT_CONN:
             return "Client connected"
-        elif self.flags == CLIENT_DISCONN:
+        elif flags == CLIENT_DISCONN:
             return "Client disconnected"
+        elif flags == CLIENT_REQ:
+            return ""
         else:
-            return f"Unsupported flag {self.flags}"
+            return f"Unsupported flag {flags}"
         
